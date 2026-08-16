@@ -1,0 +1,89 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, to_date, to_timestamp
+
+# Initialize or get existing Spark Session
+spark = SparkSession.builder.getOrCreate()
+
+# ==========================================
+# 1. Ingest Retail Data into Bronze
+# ==========================================
+retail_path = "/Volumes/workforce_ai/bronze/raw_files/online_retail.csv"
+
+retail_df = (
+    spark.read
+    .option("header", True)
+    .option("inferSchema", True)
+    .csv(retail_path)
+)
+
+bronze_retail = (
+    retail_df
+    .withColumn("InvoiceDate", to_timestamp(col("InvoiceDate")))
+    .withColumn("Quantity", col("Quantity").cast("int"))
+    .withColumn("UnitPrice", col("UnitPrice").cast("double"))
+)
+
+bronze_retail.write.mode("overwrite").saveAsTable("workforce_ai.bronze.bronze_retail_sales")
+
+
+# ==========================================
+# 2. Ingest Weather Data into Bronze
+# ==========================================
+weather_path = "/Volumes/workforce_ai/bronze/raw_files/london_weather.csv"
+
+weather_df = (
+    spark.read
+    .option("header", True)
+    .option("inferSchema", True)
+    .csv(weather_path)
+)
+
+# Parse date (handles integer format like YYYYMMDD; switch to to_date(col("date")) if already YYYY-MM-DD)
+bronze_weather = (
+    weather_df
+    .withColumn("weather_date", to_date(col("date").cast("string"), "yyyyMMdd"))
+)
+
+bronze_weather.write.mode("overwrite").saveAsTable("workforce_ai.bronze.bronze_weather")
+
+
+# ==========================================
+# 3. Ingest Bank Holidays into Bronze
+# ==========================================
+holiday_path = "/Volumes/workforce_ai/bronze/raw_files/uk_bank_holidays.csv"
+
+holiday_df = (
+    spark.read
+    .option("header", True)
+    .option("inferSchema", True)
+    .csv(holiday_path)
+)
+
+bronze_holidays = (
+    holiday_df
+    .withColumn("holiday_date", to_date(col("date")))
+)
+
+bronze_holidays.write.mode("overwrite").saveAsTable("workforce_ai.bronze.bronze_bank_holidays")
+
+
+# ==========================================
+# 4. Ingest HR Employee Data into Bronze
+# ==========================================
+hr_path = "/Volumes/workforce_ai/bronze/raw_files/hr_employees.csv"
+
+hr_df = (
+    spark.read
+    .option("header", True)
+    .option("inferSchema", True)
+    .csv(hr_path)
+)
+
+bronze_hr = (
+    hr_df
+    .withColumn("EmployeeNumber", col("EmployeeNumber").cast("int"))
+    .withColumn("Age", col("Age").cast("int"))
+    .withColumn("DailyRate", col("DailyRate").cast("double"))
+)
+
+bronze_hr.write.mode("overwrite").saveAsTable("workforce_ai.bronze.bronze_hr")
