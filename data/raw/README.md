@@ -41,15 +41,13 @@ Link: https://www.kaggle.com/datasets/rishikeshkonapure/hr-analytics-prediction
 
 After downloading the files, upload them into Databricks Volumes.
 
-Example path:
-
-​
-/Volumes/workforce_ai/bronze/raw_files/
-
 final paths:
 
 ​
 /Volumes/workforce_ai/bronze/raw_files/online_retail.csv
+
 /Volumes/workforce_ai/bronze/raw_files/london_weather.csv
+
 /Volumes/workforce_ai/bronze/raw_files/uk_bank_holidays.csv
+
 /Volumes/workforce_ai/bronze/raw_files/hr_employees.csv
